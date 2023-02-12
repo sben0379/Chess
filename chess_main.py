@@ -1,7 +1,3 @@
-"""
-This is the main file that will handle the user's interaction with the game: user inputs, displaying the game state,
-and so on.
-"""
 import pygame
 
 # To start drawing out the board, we will specify the size of the board and the squares. We will also create a
@@ -39,6 +35,22 @@ class GameState():
             ['WR', 'WN', 'WB', 'WQ', 'WK', 'WB', 'WN', 'WR']
         ]
 
+    def make_move(self, move):
+        self.board[move.end_row][move.end_col] = move.origin  # Swap second square with first square
+        self.board[move.start_row][move.start_col] = '##'  # Swap first square with empty square
+        pygame.display.update()
+
+
+# Create Move class to hold move behaviours
+class Move():
+    def __init__(self, start, end, board):
+        self.start_row = start[0]
+        self.start_col = start[1]
+        self.end_row = end[0]
+        self.end_col = end[1]
+        self.origin = board[self.start_row][self.start_col]
+        self.destination = board[self.end_row][self.end_col]
+
 
 # Define main function to act as our driver for the game. We'll start by setting up the screen and importing the game
 # state from our chess engine file.
@@ -46,19 +58,32 @@ class GameState():
 def main():
     pygame.init()
     screen = pygame.display.set_mode((width, height))
-    gs = GameState()
+    gs = GameState()  # gs is now an instance of the game
     load_images()
+    sq_clicked = ()  # xy coordinates of the square clicked
+    move_queue = []  # Keeps track of last two clicks to determine the move intended
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:  # Getting user mouse input
+                x, y = pygame.mouse.get_pos()
+                row = y // sq_size
+                col = x // sq_size
+                sq_clicked = (row, col)
+                move_queue.append(sq_clicked)
+                if len(move_queue) == 2:  # Call move function after second click
+                    move = Move(move_queue[0], move_queue[1], gs.board)
+                    gs.make_move(move)
+                    sq_clicked = ()  # Reset variables so they can be used for the next move
+                    move_queue = []
         render_game_state(screen, gs)
     pygame.quit()
 
 
 # Define render board function to alternate colours from squares to square. If we assign each row and each column a
-# number 1-9, we can alternate colours with a nested loop by checking whether a square is even or odd.
+# number 0-8, we can alternate colours with a nested loop by checking whether a square is even or odd.
 
 def render_board(screen):
     for row in range(8):
