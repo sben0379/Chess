@@ -5,7 +5,7 @@ existing Python chess modules). So far, only the Pygame module is being used in 
 project is to put everything I have learnt about Python up to this point to the test, and to learn more about algorithms and ML as we progress further into
 the project. Our initial goal will be to create a 2000 ELO strength engine. But, before we get to that stage, we'll have to start by making a 
 working chess game in Python.
-## Latest Release
+## Latest Update
 ### Version 0.3
 * All pieces now have the correct movement restrictions, with the exception of en passant, promotion and castling.
 ## Planned updates
