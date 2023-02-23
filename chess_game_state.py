@@ -47,3 +47,15 @@ class GameState:
         if piece == '~~':
             return None
         return self.piece_classes[piece]
+
+    # The check_turn() method takes the piece selected and whose turn it is according to main as arguments and returns
+    # True if they match.
+    def check_turn(self, colour, origin):
+        if colour == self.board[origin[0]][origin[1]][0]:
+            return True
+
+    def in_check(self, king):
+        pass
+        # Find the location of the king
+        # Assess if any enemy piece can legally reach that square
+        # Return False if not

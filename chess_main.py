@@ -75,6 +75,9 @@ def main():
         'BK': King
     }
     move_queue = []  # Keeps track of last two clicks to determine the move intended
+    turns = 0
+    colours = ['W', 'B']  # List will be used to keep track of whose turn it is
+    colour = colours[0]  # White always starts
     running = True
     while running:
         for event in pygame.event.get():
@@ -91,9 +94,14 @@ def main():
                     if piece_code in piece_classes:
                         piece_class = piece_classes[piece_code]
                         piece_selected = piece_class(move_queue[0], move_queue[1], gs.board)
-                        if piece_selected.check_move():
+                        if piece_selected.check_move() and gs.check_turn(colour, move_queue[0]):
                             gs.make_move(move_queue[0], move_queue[1])
-                            move_queue = []  # Reset variables to be used for the next move
+                            turns += 1
+                            if turns % 2 == 0:
+                                colour = colours[0]  # White's turn next
+                            else:
+                                colour = colours[1]  # Black's turn next
+                            move_queue = []  # Reset variable to be used for the next move
                         else:
                             move_queue = []
 
