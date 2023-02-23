@@ -6,13 +6,15 @@ project is to put everything I have learnt about Python up to this point to the 
 the project. Our initial goal will be to create a 2000 ELO strength engine. But, before we get to that stage, we'll have to start by making a 
 working chess game in Python.
 ## Latest Update
-### Version 0.4
-* Game now checks for whose turn it is and only allows one move per side.
+### Version 0.5
+* Game can now evaluate whether the king is in check and prevent the user both from making a move that does not address the check or from making a move that would move the king into check on the next turn (eg. moving a piece that's pinned to the king).
 ## Planned updates
 * Add drag and drop functionality for moving pieces
 * Get programme to recognise check, checkmate and stalemate game states
 * Add special rules (eg. en passant, castling)
 ## Update history
+### Version 0.4
+* Game now checks for whose turn it is and only allows one move per side.
 ### Version 0.3
 * All pieces now have the correct movement restrictions, with the exception of en passant, promotion and castling.
 ### Version 0.2

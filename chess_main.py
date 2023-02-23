@@ -58,7 +58,8 @@ def render_game_state(screen, gs):
 def main():
     pygame.init()
     screen = pygame.display.set_mode((width, height))
-    gs = GameState()  # gs is now an instance of the game
+    game = GameState()  # gs is now an instance of the game
+    future_board = game.future_board()
     load_images()
     piece_classes = {  # Now when we check what piece code is at a square, we can evaluate its move restrictions too.
         'WP': Pawn,
@@ -90,22 +91,27 @@ def main():
                 sq_clicked = (row, col)  # xy coordinates of the square clicked
                 move_queue.append(sq_clicked)
                 if len(move_queue) == 2:  # Call move function after second click
-                    piece_code = gs.board[move_queue[0][0]][move_queue[0][1]]  #
+                    piece_code = game.board[move_queue[0][0]][move_queue[0][1]]
                     if piece_code in piece_classes:
                         piece_class = piece_classes[piece_code]
-                        piece_selected = piece_class(move_queue[0], move_queue[1], gs.board)
-                        if piece_selected.check_move() and gs.check_turn(colour, move_queue[0]):
-                            gs.make_move(move_queue[0], move_queue[1])
-                            turns += 1
-                            if turns % 2 == 0:
-                                colour = colours[0]  # White's turn next
+                        piece_selected = piece_class(move_queue[0], move_queue[1], game.board)
+                        if piece_selected.check_move() and game.check_turn(colour, move_queue[0]):
+                            future_board.make_move(move_queue[0], move_queue[1])
+                            if not future_board.in_check(colour):
+                                game.make_move(move_queue[0], move_queue[1])
+                                turns += 1
+                                if turns % 2 == 0:
+                                    colour = colours[0]  # White's turn next
+                                else:
+                                    colour = colours[1]  # Black's turn next
+                                move_queue = []  # Reset variable to be used for the next move
                             else:
-                                colour = colours[1]  # Black's turn next
-                            move_queue = []  # Reset variable to be used for the next move
+                                print('King is in check!')
+                                future_board = game.future_board()
+                                move_queue = []
                         else:
                             move_queue = []
-
-        render_game_state(screen, gs)
+        render_game_state(screen, game)
     pygame.quit()
 
 
