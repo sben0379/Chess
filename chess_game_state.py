@@ -22,6 +22,7 @@ class GameState:
 
         self.white_king = None
         self.black_king = None
+        self.moves = []
 
     piece_classes = {
         'WK': King,
@@ -47,9 +48,85 @@ class GameState:
 
     # The make_move() method alters the state of the board when called in the main function by swapping the element in
     # the target square with the element in the origin square, and then changing the origin square to an empty space.
+    # However we will first check if either of the special castling or promotion moves have been played, as those will
+    # require extra functionality beyond just swapping squares.
     def make_move(self, origin, destination):
         self.board[destination[0]][destination[1]] = self.board[origin[0]][origin[1]]
         self.board[origin[0]][origin[1]] = '~~'
+
+    # Add the most recent move as a list of tuples to the self.moves list, creating a 2D list.
+    def add_move(self, origin, destination):
+        move = [origin, destination]
+        self.moves.append(move)
+
+    # Separate function for pawn moves to check for en passant and promotion
+
+    def make_pawn_move(self, origin, destination):
+        if self.board[origin[0]][origin[1]] == 'WP' and destination[0] == 0:
+            self.board[destination[0]][destination[1]] = 'WQ'
+            self.board[origin[0]][origin[1]] = '~~'
+        elif self.board[origin[0]][origin[1]] == 'BP' and destination[0] == 7:
+            self.board[destination[0]][destination[1]] = 'BQ'
+            self.board[origin[0]][origin[1]] = '~~'
+        else:
+            self.board[destination[0]][destination[1]] = self.board[origin[0]][origin[1]]
+            self.board[origin[0]][origin[1]] = '~~'
+
+    # Separate function to make a king move to allow for castling:
+
+    def make_king_move(self, origin, destination, colour):
+        if colour == 'W':
+            if destination == (7, 6) and origin == (7, 4):
+                self.board[7][6] = 'WK'
+                self.board[7][5] = 'WR'
+                self.board[7][4] = '~~'
+            elif destination == (7, 2) and origin == (7, 4):
+                self.board[7][2] = 'WK'
+                self.board[7][3] = 'WR'
+                self.board[7][4] = '~~'
+            else:
+                self.board[destination[0]][destination[1]] = self.board[origin[0]][origin[1]]
+                self.board[origin[0]][origin[1]] = '~~'
+        elif colour == 'B':
+            if destination == (0, 6) and origin == (0, 4):
+                self.board[0][6] = 'BK'
+                self.board[0][5] = 'BR'
+                self.board[0][4] = '~~'
+            elif destination == (0, 2) and origin == (0, 4):
+                self.board[0][2] = 'BK'
+                self.board[0][3] = 'BR'
+                self.board[0][4] = '~~'
+            else:
+                self.board[destination[0]][destination[1]] = self.board[origin[0]][origin[1]]
+                self.board[origin[0]][origin[1]] = '~~'
+
+        # If a player attempts to castle, we must check if either the king or the rook on the side which the player is
+        # trying to castle on has moved during the game. If either one has, castling would be illegal and we should
+        # return False.
+
+    def castle(self, colour, side):
+        if colour == 'W':
+            if side == 'Kingside':
+                for move in self.moves:
+                    if (7, 4) in move or (7, 7) in move:
+                        return False
+                return True
+            elif side == 'Queenside':
+                for move in self.moves:
+                    if (7, 4) in move or (7, 0) in move:
+                        return False
+                return True
+        elif colour == 'B':
+            if side == 'Kingside':
+                for move in self.moves:
+                    if (0, 4) in move or (0, 7) in move:
+                        return False
+                return True
+            elif side == 'Queenside':
+                for move in self.moves:
+                    if (0, 4) in move or (0, 0) in move:
+                        return False
+                return True
 
     # The get_piece() method accesses the piece_classes dictionary and returns the piece present at any given square.
     def get_piece(self, row, col):
@@ -63,6 +140,8 @@ class GameState:
     def check_turn(self, colour, origin):
         if colour == self.board[origin[0]][origin[1]][0]:
             return True
+        else:
+            return False
 
     def in_check(self, colour):
         # Find the positions of the kings
@@ -78,7 +157,7 @@ class GameState:
             for row in range(len(self.board)):
                 for col in range(len(self.board[row])):
                     piece = self.board[row][col]
-                    if piece[0] == 'B':
+                    if piece[0] == 'B' and piece != 'BK':
                         piece_square = (row, col)
                         attacking_piece = self.piece_classes[piece](piece_square, self.white_king, self.board)
                         if attacking_piece.check_move():
@@ -89,9 +168,10 @@ class GameState:
             for row in range(len(self.board)):
                 for col in range(len(self.board[row])):
                     piece = self.board[row][col]
-                    if piece[0] == 'W':
+                    if piece[0] == 'W' and piece != 'WK':
                         piece_square = (row, col)
                         attacking_piece = self.piece_classes[piece](piece_square, self.black_king, self.board)
                         if attacking_piece.check_move():
                             return True
             return False
+

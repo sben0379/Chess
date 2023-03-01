@@ -181,18 +181,41 @@ class Queen:
 
 
 class King:
-    def __init__(self, start, end, board):
+    def __init__(self, start, end, board, move_tracker):
         self.start_row, self.start_col = start
         self.end_row, self.end_col = end
         self.origin, self.destination = board[self.start_row][self.start_col], board[self.end_row][self.end_col]
         self.board = board
+        self.move_tracker = move_tracker
 
-    # The king can move in any direction by one square. We just need to make sure the move requested has a maximum
-    # delta of 1 and check whether the target is occupied by a friendly piece. We will handle 'check' restrictions in a
-    # separate function
+    # The king can move in any direction by one square (unless castling). We just need to make sure the move
+    # requested has a maximum delta of 1 and check whether the target is occupied by a friendly piece. However we
+    # will first check whether the player is attempting to castle and evaluate the legality by calling the castle()
+    # method from the MoveTracker class. We will handle 'check' restrictions in a separate function.
     def check_move(self):
-        if (self.origin == 'WK' and self.destination not in white_pieces) or (self.origin == 'BK' and self.destination
-                                                                              not in black_pieces):
-            valid_moves = ((-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1))  # The 8 possible moves
-            return (self.end_row - self.start_row, self.end_col - self.start_col) in valid_moves
-        return False
+        if self.origin == 'WK' and self.destination not in white_pieces:
+            if (self.start_row == 7 and self.end_col == 4) and (self.end_row == 7 and self.end_col == 6):
+                move = self.move_tracker.castle('W', 'kingside')
+                if move:
+                    return True
+            elif (self.start_row == 7 and self.end_col == 4) and (self.end_row == 7 and self.end_col == 2):
+                move = self.move_tracker.castle('W', 'queenside')
+                if move:
+                    return True
+            else:
+                valid_moves = (
+                (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1))  # The 8 possible moves
+                return (self.end_row - self.start_row, self.end_col - self.start_col) in valid_moves
+        elif self.origin == 'BK' and self.destination not in black_pieces:
+            if (self.start_row == 0 and self.end_col == 4) and (self.end_row == 0 and self.end_col == 6):
+                move = self.move_tracker.castle('B', 'kingside')
+                if move:
+                    return True
+            elif (self.start_row == 0 and self.end_col == 4) and (self.end_row == 0 and self.end_col == 6):
+                move = self.move_tracker.castle('B', 'queenside')
+                if move:
+                    return True
+            else:
+                valid_moves = (
+                (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1))  # The 8 possible moves
+                return (self.end_row - self.start_row, self.end_col - self.start_col) in valid_moves

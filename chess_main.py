@@ -94,23 +94,48 @@ def main():
                     piece_code = game.board[move_queue[0][0]][move_queue[0][1]]
                     if piece_code in piece_classes:
                         piece_class = piece_classes[piece_code]
-                        piece_selected = piece_class(move_queue[0], move_queue[1], game.board)
-                        if piece_selected.check_move() and game.check_turn(colour, move_queue[0]):
-                            future_board.make_move(move_queue[0], move_queue[1])
-                            if not future_board.in_check(colour):
-                                game.make_move(move_queue[0], move_queue[1])
-                                turns += 1
-                                if turns % 2 == 0:
-                                    colour = colours[0]  # White's turn next
-                                else:
-                                    colour = colours[1]  # Black's turn next
-                                move_queue = []  # Reset variable to be used for the next move
-                            else:
-                                print('King is in check!')
-                                future_board = game.future_board()
-                                move_queue = []
+                        if piece_class == Pawn:
+                            piece_selected = piece_class(move_queue[0], move_queue[1], game.board)
+                            if piece_selected.check_move() and game.check_turn(colour, move_queue[0]):
+                                future_board.make_pawn_move(move_queue[0], move_queue[1])
+                                if not future_board.in_check(colour):
+                                    game.make_pawn_move(move_queue[0], move_queue[1])
+                                    turns += 1
+                                    if turns % 2 == 0:
+                                        colour = colours[0]  # White's turn next
+                                    else:
+                                        colour = colours[1]  # Black's turn next
+                                    move_queue = []  # Reset variable to be used for the next move
+                        elif piece_class == King:
+                            piece_selected = King(move_queue[0], move_queue[1], game.board)
+                            if piece_selected.check_move() and game.check_turn(colour, move_queue[0]):
+                                future_board.make_king_move(move_queue[0], move_queue[1], colour)
+                                if not future_board.in_check(colour):
+                                    game.make_king_move(move_queue[0], move_queue[1], colour)
+                                    turns += 1
+                                    if turns % 2 == 0:
+                                        colour = colours[0]  # White's turn next
+                                    else:
+                                        colour = colours[1]  # Black's turn next
+                                    move_queue = []  # Reset variable to be used for the next move
                         else:
-                            move_queue = []
+                            piece_selected = piece_class(move_queue[0], move_queue[1], game.board)
+                            if piece_selected.check_move() and game.check_turn(colour, move_queue[0]):
+                                future_board.make_move(move_queue[0], move_queue[1])
+                                if not future_board.in_check(colour):
+                                    game.make_move(move_queue[0], move_queue[1])
+                                    turns += 1
+                                    if turns % 2 == 0:
+                                        colour = colours[0]  # White's turn next
+                                    else:
+                                        colour = colours[1]  # Black's turn next
+                                    move_queue = []  # Reset variable to be used for the next move
+                                else:
+                                    print('King is in check!')
+                                    future_board = game.future_board()
+                                    move_queue = []
+                            else:
+                                move_queue = []
         render_game_state(screen, game)
     pygame.quit()
 
